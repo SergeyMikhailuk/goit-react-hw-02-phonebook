@@ -14,4 +14,8 @@ export const ListItem = styled.li`
   button {
     margin-left: auto;
   }
+
+  :not(:last-of-type) {
+    margin-bottom: 8px;
+  }
 `;

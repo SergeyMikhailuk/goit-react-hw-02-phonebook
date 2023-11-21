@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
+import Notiflix from 'notiflix';
 
 import ContactForm, { ContactsInitialValues } from 'components/ContactForm';
 import ContactList from 'components/ContactList';
+import Filter from 'components/Filter';
 
 import { Wrapper } from './App.styled';
 
@@ -17,6 +19,15 @@ class App extends Component<{}, AppState> {
   };
 
   onSubmitForm = (values: ContactsInitialValues) => {
+    const { name } = values;
+    const existName = this.state.contacts.find(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (existName) {
+      return Notiflix.Notify.failure(`${name} is already in contacts.`);
+    }
+
     this.setState(prevState => {
       return { contacts: [...prevState.contacts, values] };
     });
@@ -28,17 +39,29 @@ class App extends Component<{}, AppState> {
     }));
   };
 
-  render() {
-    console.log('this.state.contacts: ', this.state.contacts);
-    const { contacts } = this.state;
+  onFilterList = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ filter: e.currentTarget.value });
+  };
 
+  getFilteredContacts = () => {
+    const contactToLowerCase = this.state.filter.toLowerCase();
+    return this.state.contacts.filter(contact =>
+      contact.name.toLowerCase().includes(contactToLowerCase)
+    );
+  };
+
+  render() {
     return (
       <Wrapper>
         <h1>Phonebook</h1>
         <ContactForm onSubmitForm={this.onSubmitForm} />
 
         <h2>Contacts</h2>
-        <ContactList contacts={contacts} onContactDelete={this.onContactDelete} />
+        <Filter filter={this.state.filter} onFilterList={this.onFilterList} />
+        <ContactList
+          getContacts={this.getFilteredContacts}
+          onContactDelete={this.onContactDelete}
+        />
       </Wrapper>
     );
   }
